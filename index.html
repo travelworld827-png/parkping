@@ -162,7 +162,99 @@
     font-size: 18px; padding: 18px;
   }
 
-  /* ── QR RESULT ── */
+  .btn-whatsapp {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+    font-size: 17px; padding: 17px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+
+  .btn-call-direct {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    box-shadow: none;
+    font-size: 15px; padding: 14px;
+    margin-top: 2px;
+  }
+  .btn-call-direct:active { background: var(--border); }
+
+  .contact-divider {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--muted); font-size: 12px;
+    margin: 14px 0 12px;
+  }
+  .contact-divider::before, .contact-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .call-disclaimer {
+    text-align: center; font-size: 11px; color: var(--muted);
+    margin-top: 8px; line-height: 1.5;
+  }
+
+  /* ── QR RESULT WRAPPER ── */
+  .qr-result {
+    display: none; flex-direction: column; align-items: center;
+    gap: 16px; padding: 4px 0;
+  }
+  .qr-result.show { display: flex; animation: scaleIn 0.35s ease both; }
+
+  /* ── STICKER PREVIEW ── */
+  .sticker-preview {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+    display: flex; flex-direction: column; align-items: center;
+    font-family: 'Arial', sans-serif;
+  }
+  .sticker-top-bar {
+    width: 100%;
+    background: linear-gradient(135deg, #ff6b35, #ffb347);
+    color: #fff;
+    font-weight: 800; font-size: 15px; letter-spacing: 1px;
+    text-align: center; padding: 11px 0;
+    text-transform: uppercase;
+  }
+  .sticker-headline {
+    color: #111;
+    font-size: 22px; font-weight: 900;
+    text-align: center;
+    margin: 18px 20px 4px;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+  }
+  .sticker-sub {
+    color: #555; font-size: 13px;
+    text-align: center; margin: 0 24px 14px;
+    line-height: 1.5;
+  }
+  .sticker-qr-wrap {
+    background: #fff;
+    border: 3px solid #111;
+    border-radius: 16px;
+    padding: 12px;
+    margin: 0 0 12px;
+    box-shadow: 4px 4px 0px #ff6b35;
+  }
+  .sticker-qr-wrap canvas,
+  .sticker-qr-wrap img {
+    display: block;
+    width: 160px !important; height: 160px !important;
+  }
+  .sticker-tagline {
+    color: #ff6b35; font-size: 13px; font-weight: 700;
+    letter-spacing: 0.5px; margin-bottom: 8px;
+  }
+  .sticker-footer {
+    width: 100%;
+    background: #111;
+    color: #aaa; font-size: 11px;
+    text-align: center; padding: 9px 0;
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
   .qr-result {
     display: none; flex-direction: column; align-items: center;
     gap: 20px; padding: 8px 0;
@@ -336,15 +428,15 @@
   //    CREATE POLICY "Allow read by token" ON parking_tokens FOR SELECT USING (true);
   // 3. Replace the values below:
 
-  const SUPABASE_URL = 'https://vfepuupwexhqyuuqtllx.supabase.co';      // e.g. https://xxxx.supabase.co
-  const SUPABASE_ANON_KEY = 'sb_publishable_pXA5noZo3ABPAx_uqlCyyg_pRDtcSGy'; // Your anon/public key
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL';      // e.g. https://xxxx.supabase.co
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Your anon/public key
   const APP_URL = window.location.origin + window.location.pathname; // Auto-detected
 </script>
 
 <div id="calling-overlay" class="calling-overlay">
-  <div class="calling-emoji">📞</div>
-  <h2>Calling owner...</h2>
-  <p>Your call is being connected privately</p>
+  <div class="calling-emoji">💬</div>
+  <h2>Opening WhatsApp...</h2>
+  <p>A message is pre-filled and ready to send</p>
   <button class="btn btn-ghost" style="max-width:200px;margin-top:10px;" onclick="document.getElementById('calling-overlay').classList.remove('show')">Dismiss</button>
 </div>
 
@@ -369,32 +461,39 @@
       <div class="call-card">
         <div id="car-plate-display" class="car-plate">ABC 1234</div>
         <div class="pulse-ring">
-          <div class="pulse-inner">📞</div>
+          <div class="pulse-inner">🚗</div>
         </div>
-        <h2 class="call-title">Call Car Owner</h2>
-        <p class="call-sub" id="call-note-text">Someone needs to reach you about your parked car.</p>
-        <div class="privacy-badge">
-          🔒 Phone number protected — never visible
-        </div>
-        <button class="btn btn-green" id="call-btn" onclick="initiateCall()">
-          📞 &nbsp;Call Owner Now
+        <h2 class="call-title">Contact Car Owner</h2>
+        <p class="call-sub" id="call-note-text">Reach the owner privately — their number is never shown.</p>
+        <!-- PRIMARY: WhatsApp (always works, free) -->
+        <button class="btn btn-whatsapp" id="whatsapp-btn" onclick="initiateWhatsApp()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          &nbsp;Message on WhatsApp
         </button>
+
+        <div class="contact-divider"><span>or</span></div>
+
+        <!-- SECONDARY: Direct call (shows number on dialer — noted) -->
+        <button class="btn btn-call-direct" id="call-btn" onclick="initiateCall()">
+          📞 &nbsp;Call Directly
+        </button>
+
       </div>
 
       <div class="card" style="margin-top:16px;">
         <div class="steps">
           <div class="step">
-            <div class="step-num">🔒</div>
+            <div class="step-num">💬</div>
             <div class="step-text">
-              <h4>Privacy Protected</h4>
-              <p>The owner's phone number is securely stored and never shown to you. Your call goes through privately.</p>
+              <h4>WhatsApp — Fully Private</h4>
+              <p>Opens WhatsApp with a ready message. The owner sees your WhatsApp contact, not a random number.</p>
             </div>
           </div>
           <div class="step">
-            <div class="step-num">⚡</div>
+            <div class="step-num">🔒</div>
             <div class="step-text">
-              <h4>Instant Connect</h4>
-              <p>Tap the button to open your phone dialer and connect with the car owner immediately.</p>
+              <h4>Number Never on Screen</h4>
+              <p>The owner's phone number is stored securely and never displayed anywhere on this page.</p>
             </div>
           </div>
         </div>
@@ -469,23 +568,29 @@
 
       <!-- QR Result -->
       <div class="card" id="qr-result-card" style="display:none;">
-        <div class="card-title"><span class="icon">✅</span> Your QR Code is Ready!</div>
+        <div class="card-title"><span class="icon">✅</span> Your QR Sticker is Ready!</div>
         <div class="qr-result show" id="qr-result-area">
-          <div class="qr-box">
-            <div id="qrcode"></div>
+
+          <!-- Beautiful sticker preview -->
+          <div class="sticker-preview">
+            <div class="sticker-top-bar">🚗 &nbsp;ParkPing</div>
+            <div class="sticker-headline">Blocked by this car?</div>
+            <div class="sticker-sub">Scan the QR code below &amp; reach me in seconds</div>
+            <div class="sticker-qr-wrap">
+              <div id="qrcode"></div>
+            </div>
+            <div class="sticker-tagline">👆 Point your camera here</div>
+            <div class="sticker-footer">Quick • Easy • Hassle-free</div>
           </div>
-          <div class="qr-label">
-            <h3>Print & Stick on Your Car</h3>
-            <p>Anyone scanning this will be able to call you — without ever seeing your number.</p>
-          </div>
+
           <div class="token-badge">
-            🔑 &nbsp;Your QR Link: <code id="token-display"></code>
+            🔗 &nbsp;<code id="token-display"></code>
           </div>
           <div class="qr-actions">
-            <button class="btn" onclick="downloadQR()">⬇️ Save QR</button>
+            <button class="btn" onclick="downloadQR()">⬇️ Download Sticker</button>
             <button class="btn btn-ghost" onclick="copyLink()">🔗 Copy Link</button>
           </div>
-          <button class="btn btn-ghost" style="width:100%;" onclick="resetForm()">+ Generate New QR</button>
+          <button class="btn btn-ghost" style="width:100%;margin-top:4px;" onclick="resetForm()">+ Generate New QR</button>
         </div>
       </div>
 
@@ -647,16 +752,34 @@ function showNotFound() {
   document.getElementById('call-notfound').style.display = 'block';
 }
 
+function initiateWhatsApp() {
+  if (!currentPhone) return;
+  // Build WhatsApp link — number never shown in UI
+  const plate = document.getElementById('car-plate-display')?.textContent || 'your car';
+  const msg = encodeURIComponent(`Hi! I scanned the ParkPing QR on ${plate}. Could you please move your car? Thank you!`);
+  // Strip leading + for wa.me format
+  const waNumber = currentPhone.replace(/^\+/, '');
+  const overlay = document.getElementById('calling-overlay');
+  overlay.querySelector('h2').textContent = 'Opening WhatsApp...';
+  overlay.querySelector('p').textContent = 'A message is pre-filled and ready to send';
+  overlay.querySelector('.calling-emoji').textContent = '💬';
+  overlay.classList.add('show');
+  setTimeout(() => {
+    window.open('https://wa.me/' + waNumber + '?text=' + msg, '_blank');
+    setTimeout(() => overlay.classList.remove('show'), 2500);
+  }, 400);
+}
+
 function initiateCall() {
   if (!currentPhone) return;
-  document.getElementById('calling-overlay').classList.add('show');
-  // Small delay so overlay shows before dialer opens
+  const overlay = document.getElementById('calling-overlay');
+  overlay.querySelector('h2').textContent = 'Opening dialer...';
+  overlay.querySelector('p').textContent = 'Number may appear in your phone dialer';
+  overlay.querySelector('.calling-emoji').textContent = '📞';
+  overlay.classList.add('show');
   setTimeout(() => {
     window.location.href = 'tel:' + currentPhone;
-    // Hide overlay after 3s
-    setTimeout(() => {
-      document.getElementById('calling-overlay').classList.remove('show');
-    }, 3000);
+    setTimeout(() => overlay.classList.remove('show'), 3000);
   }, 400);
 }
 
@@ -705,8 +828,8 @@ async function generateQR() {
     document.getElementById('qrcode').innerHTML = '';
     new QRCode(document.getElementById('qrcode'), {
       text: qrUrl,
-      width: 178, height: 178,
-      colorDark: '#000000', colorLight: '#ffffff',
+      width: 160, height: 160,
+      colorDark: '#111111', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.H
     });
 
@@ -732,38 +855,90 @@ function downloadQR() {
   const canvas = document.querySelector('#qrcode canvas');
   if (!canvas) { showToast('QR not ready yet', 'error'); return; }
 
-  // Create a nicer download canvas with padding & label
+  const W = 420, H = 560;
   const out = document.createElement('canvas');
-  out.width = 300; out.height = 360;
+  out.width = W; out.height = H;
   const ctx = out.getContext('2d');
 
-  // BG
+  // ── White background with rounded rect ──
   ctx.fillStyle = '#ffffff';
-  ctx.roundRect ? ctx.roundRect(0,0,300,360,16) : ctx.fillRect(0,0,300,360);
+  ctx.beginPath();
+  ctx.roundRect(0, 0, W, H, 24);
   ctx.fill();
 
-  // QR
-  ctx.drawImage(canvas, 61, 30, 178, 178);
+  // ── Orange top bar ──
+  const grad = ctx.createLinearGradient(0,0,W,0);
+  grad.addColorStop(0, '#ff6b35');
+  grad.addColorStop(1, '#ffb347');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.roundRect(0, 0, W, 60, [24, 24, 0, 0]);
+  ctx.fill();
 
-  // Text
-  ctx.fillStyle = '#111111';
-  ctx.font = 'bold 18px Arial';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 20px Arial';
   ctx.textAlign = 'center';
-  ctx.fillText('🚗 Scan to Call Owner', 150, 240);
+  ctx.letterSpacing = '2px';
+  ctx.fillText('🚗  PARKPING', W/2, 38);
 
-  ctx.fillStyle = '#666666';
-  ctx.font = '13px Arial';
-  ctx.fillText('Phone number is private & protected', 150, 264);
+  // ── Headline ──
+  ctx.fillStyle = '#111111';
+  ctx.font = 'bold 34px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('Blocked by this car?', W/2, 118);
 
+  // ── Sub text ──
+  ctx.fillStyle = '#555555';
+  ctx.font = '17px Arial';
+  ctx.fillText('Scan the QR code below &', W/2, 152);
+  ctx.fillText('reach me in seconds', W/2, 174);
+
+  // ── QR box with orange shadow ──
+  const qrSize = 200;
+  const qrX = (W - qrSize) / 2;
+  const qrY = 196;
+  const pad = 14;
+
+  // shadow
   ctx.fillStyle = '#ff6b35';
-  ctx.font = 'bold 13px Arial';
-  ctx.fillText('ParkPing', 150, 290);
+  ctx.beginPath();
+  ctx.roundRect(qrX + 5, qrY + 5, qrSize + pad*2, qrSize + pad*2, 18);
+  ctx.fill();
+
+  // white box
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#111111';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(qrX, qrY, qrSize + pad*2, qrSize + pad*2, 18);
+  ctx.fill();
+  ctx.stroke();
+
+  // draw QR inside
+  ctx.drawImage(canvas, qrX + pad, qrY + pad, qrSize, qrSize);
+
+  // ── Tagline ──
+  ctx.fillStyle = '#ff6b35';
+  ctx.font = 'bold 16px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('👆  Point your camera here', W/2, qrY + qrSize + pad*2 + 32);
+
+  // ── Footer bar ──
+  ctx.fillStyle = '#111111';
+  ctx.beginPath();
+  ctx.roundRect(0, H - 52, W, 52, [0, 0, 24, 24]);
+  ctx.fill();
+
+  ctx.fillStyle = '#aaaaaa';
+  ctx.font = '13px Arial';
+  ctx.letterSpacing = '2px';
+  ctx.fillText('QUICK  •  EASY  •  HASSLE-FREE', W/2, H - 22);
 
   const link = document.createElement('a');
-  link.download = 'parkping-qr.png';
+  link.download = 'parkping-sticker.png';
   link.href = out.toDataURL('image/png');
   link.click();
-  showToast('QR image saved!', 'success');
+  showToast('Sticker downloaded! 🎉', 'success');
 }
 
 function copyLink() {
