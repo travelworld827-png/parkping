@@ -754,20 +754,10 @@ function showNotFound() {
 
 function initiateWhatsApp() {
   if (!currentPhone) return;
-  // Build WhatsApp link — number never shown in UI
   const plate = document.getElementById('car-plate-display')?.textContent || 'your car';
-  const msg = encodeURIComponent(`Hi! I scanned the ParkPing QR on ${plate}. Could you please move your car? Thank you!`);
-  // Strip leading + for wa.me format
+  const msg = encodeURIComponent('Hi! I scanned the ParkPing QR on ' + plate + '. Could you please move your car? Thank you!');
   const waNumber = currentPhone.replace(/^\+/, '');
-  const overlay = document.getElementById('calling-overlay');
-  overlay.querySelector('h2').textContent = 'Opening WhatsApp...';
-  overlay.querySelector('p').textContent = 'A message is pre-filled and ready to send';
-  overlay.querySelector('.calling-emoji').textContent = '💬';
-  overlay.classList.add('show');
-  setTimeout(() => {
-    window.open('https://wa.me/' + waNumber + '?text=' + msg, '_blank');
-    setTimeout(() => overlay.classList.remove('show'), 2500);
-  }, 400);
+  window.location.href = 'https://wa.me/' + waNumber + '?text=' + msg;
 }
 
 function initiateCall() {
